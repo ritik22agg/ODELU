@@ -1173,9 +1173,12 @@ int bswabe_dec( bswabe_pub_t* pub,bswabe_prv_t* prv, bswabe_cph_t* cph,element_t
 
 	
 	unsigned long int K_mi; 
+	unsigned long int final_Km = 0;
      
      if( mpz_divisible_p (prv -> e_a, cph -> e_p) !=0)
 	{
+	mpz_divexact(expo,prv -> e_a, cph -> e_p);
+	unsigned long int a_p = mpz_get_ui(expo);
 	unsigned long int pub_N = mpz_get_ui(pub -> N);
        gmp_printf("value of pubn before in decrypt == %Zd\n", pub->n);
 	unsigned long int cph_Rm = mpz_get_ui(cph -> R_m);
@@ -1192,6 +1195,8 @@ int bswabe_dec( bswabe_pub_t* pub,bswabe_prv_t* prv, bswabe_cph_t* cph,element_t
 	unsigned long int Ym_k2 = powe(cph_Ym, prv_k2, pub_N);
 	printf("value of Ym_k2 in decrypt from integer approach is %lu\n", Ym_k2); 
 	K_mi = (Rm_k1 * Ym_k2) % pub_N; 
+	final_Km = powe(K_mi, a_p, pub_N);
+
 	printf("value of Rm_k1 in decrypt from integer approach is %lu\n", Rm_k1);
 	printf("value of Ym_k2 in decrypt from integer approach is %lu\n", Ym_k2);
 	printf("value of K_mi in decrypt from integer approach is %lu\n", K_mi); 
@@ -1208,7 +1213,7 @@ int bswabe_dec( bswabe_pub_t* pub,bswabe_prv_t* prv, bswabe_cph_t* cph,element_t
         mpz_mul(product3,product1,product2);        
         gmp_printf("value of product3 in decrypt == %Zd\n", product3); 
         mpz_mod(a,product3,pub ->N);
-        mpz_divexact(expo,prv -> e_a, cph -> e_p);
+        
        gmp_printf("value of expo in decrypt == %Zd\n", expo);
         mpz_powm(K_m,a, expo,pub ->N);          
 	gmp_printf("value of K_m in decrypt == %Zd\n", K_m);   
@@ -1238,7 +1243,7 @@ int bswabe_dec( bswabe_pub_t* pub,bswabe_prv_t* prv, bswabe_cph_t* cph,element_t
 
         mpz_t H2_K_m;
 	mpz_init(H2_K_m);
-	mpz_init_set_ui(K_m, K_mi);
+	mpz_init_set_ui(K_m, final_Km);
 	char str1[10000];
 	//take_Concatenate(str1,K_m,blank1,blank2);
 	mpz_get_str(str1,10,K_m); 
